@@ -131,24 +131,24 @@ def NonLocal(net,depth,embed=True,softmax=True,name='NonLocal'):
         else:
             a, b = net, net
         g_orig = g = conv_b(net, depth, 1,1, name='g')
-    # Flatten from (B,H,W,C) to (B,HW,C) or similar
-    a_flat = tf.reshape(a, [tf.shape(a)[0], -1, tf.shape(a)[-1]])
-    b_flat = tf.reshape(b, [tf.shape(b)[0], -1, tf.shape(b)[-1]])
-    g_flat = tf.reshape(g, [tf.shape(g)[0], -1, tf.shape(g)[-1]])
-    a_flat.set_shape([a.shape[0], a.shape[1] * a.shape[2] if None not in a.shape[1:3] else None, a.shape[-1]])
-    b_flat.set_shape([b.shape[0], b.shape[1] * b.shape[2] if None not in b.shape[1:3] else None, b.shape[-1]])
-    g_flat.set_shape([g.shape[0], g.shape[1] * g.shape[2] if None not in g.shape[1:3] else None, g.shape[-1]])
-    # Compute f(a, b) -> (B,HW,HW)
-    f = tf.matmul(a_flat, tf.transpose(b_flat, [0, 2, 1]))
-    if softmax:
-        f = tf.nn.softmax(f)
-    else:
-        f = f / tf.cast(tf.shape(f)[-1], tf.float32)
-    # Compute f * g ("self-attention") -> (B,HW,C)
-    fg = tf.matmul(f, g_flat)
-    # Expand and fix the static shapes TF lost track of.
-    fg = tf.reshape(fg, tf.shape(g_orig))
-    return fg
+        # Flatten from (B,H,W,C) to (B,HW,C) or similar
+        a_flat = tf.reshape(a, [tf.shape(a)[0], -1, tf.shape(a)[-1]])
+        b_flat = tf.reshape(b, [tf.shape(b)[0], -1, tf.shape(b)[-1]])
+        g_flat = tf.reshape(g, [tf.shape(g)[0], -1, tf.shape(g)[-1]])
+        a_flat.set_shape([a.shape[0], a.shape[1] * a.shape[2] if None not in a.shape[1:3] else None, a.shape[-1]])
+        b_flat.set_shape([b.shape[0], b.shape[1] * b.shape[2] if None not in b.shape[1:3] else None, b.shape[-1]])
+        g_flat.set_shape([g.shape[0], g.shape[1] * g.shape[2] if None not in g.shape[1:3] else None, g.shape[-1]])
+        # Compute f(a, b) -> (B,HW,HW)
+        f = tf.matmul(a_flat, tf.transpose(b_flat, [0, 2, 1]))
+        if softmax:
+            f = tf.nn.softmax(f)
+        else:
+            f = f / tf.cast(tf.shape(f)[-1], tf.float32)
+        # Compute f * g ("self-attention") -> (B,HW,C)
+        fg = tf.matmul(f, g_flat)
+        # Expand and fix the static shapes TF lost track of.
+        fg = tf.reshape(fg, tf.shape(g_orig))
+        return fg
 def inception(net,depth,is_train = True,name='inception'):
     with tf.variable_scope(name):
         conv_1 = ReLU(conv_bn(net,int(depth/4),1,1,is_train=is_train,name='conv1x1'),name='ReLU_1x1')
