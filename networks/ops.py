@@ -149,3 +149,16 @@ def NonLocal(net,depth,embed=True,softmax=True,name='NonLocal'):
     # Expand and fix the static shapes TF lost track of.
     fg = tf.reshape(fg, tf.shape(g_orig))
     return fg
+def inception(net,depth,is_train = True,name='inception'):
+    with tf.variable_scope(name):
+        conv_1 = ReLU(conv_bn(net,int(depth/4),1,1,is_train=is_train,name='conv1x1'),name='ReLU_1x1')
+        conv_2_1 = conv_relu(net,int(depth/4),1,1,name='conv1x1_3')
+        conv_2_2 = ReLU(conv_bn(conv_2_1,int(depth/4),1,3,is_train=is_train,name='conv1x3'),name='ReLU_1x3')
+        conv_3_1 = conv_relu(net,int(depth/4),1,1,name='conv1x1_5')
+        conv_3_2 = ReLU(conv_bn(conv_3_1,int(depth/4),1,5,is_train=is_train,name='conv1x5'),name='ReLU_1x5')
+        max_pool = tf.nn.max_pool(net, [1, 1, 3, 1], [1, 1, 1, 1], padding='SAME', name='MaxPooling1')  ##
+        max_pool_conv = ReLU(conv_bn(max_pool,int(depth/4),1,1,is_train=is_train,name='pool_conv1x1'),name='ReLU_pool_conv')
+
+        res = tf.concat((conv_1,conv_2_2,conv_3_2,max_pool_conv),-1)
+
+        return res

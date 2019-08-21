@@ -46,7 +46,7 @@ def train(args):
     x = tf.placeholder(tf.float32,shape = [args.batch_size,1,256, 2])
     y_ = tf.placeholder(tf.float32,shape = [args.batch_size,1,256,1])
 
-    y = model.inference(x,args=args)
+    y = model.inference_incep(x,args=args)
     loss = tf.reduce_mean(tf.abs(y - y_))
 
 
