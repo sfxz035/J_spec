@@ -47,7 +47,8 @@ def train(args):
     y_ = tf.placeholder(tf.float32,shape = [args.batch_size,1,256,1])
 
     y = model.inference_incep(x,args=args)
-    loss = tf.reduce_mean(tf.abs(y - y_))
+    # loss = tf.reduce_mean(tf.abs(y - y_))
+    loss = model.huber_loss(y_,y,delta=1.0)
 
 
     tf.summary.scalar('loss', loss)

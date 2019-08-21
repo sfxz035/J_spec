@@ -145,7 +145,14 @@ def resBlock(input,feature_size=64,kernel_size=[1,3],strides=[1,1,1,1],is_traini
         output = conv2 + input
         return output
 
-
+def huber_loss(labels, predictions, delta):
+    residual = tf.abs(predictions - labels)
+    condition = tf.less(residual, delta)
+    small_res = 0.5 * tf.square(residual)
+    large_res = delta * residual - 0.5 * tf.square(delta)
+    loss = tf.where(condition, small_res, large_res)
+    loss = tf.reduce_mean(loss)
+    return loss
 
 
 
